@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>OECDdata: discovery, careful selection, and reproducible analysis</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">OECDdata: discovery, careful selection, and
+reproducible analysis</h1>
+
+
+
+<div id="a-reliable-workflow" class="section level2">
+<h2>A reliable workflow</h2>
+<p>Discover a dataflow, inspect its dimensions and dictionaries,
+restrict the request, inspect status and units, and only then calculate
+statistics. The <code>eurodata</code> package inspires the workflow, but
+names, classes and identities are OECD-native. The default route is SDMX
+REST v2. See the package README for current protocol references and a
+detailed interface and migration guide.</p>
+<p>All evaluated chunks in this vignette are offline. The following
+object contains invented teaching observations, not actual OECD
+statistics.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">oecdExample</span>()</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>x[, .(REF_AREA, TIME_PERIOD, value_, flags_)]</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt;     REF_AREA TIME_PERIOD value_ flags_</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt;       &lt;char&gt;      &lt;char&gt;  &lt;num&gt; &lt;char&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt;  1:      USA     2024-01  100.0      A</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt;  2:      USA     2024-02  101.5      A</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt;  3:      USA     2024-03  102.0      A</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt;  4:      USA     2024-04  103.2      A</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt;  5:      USA     2024-05  102.9      A</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt;  6:      USA     2024-06  104.1      P</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt;  7:      FRA     2024-01  100.0      A</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt;  8:      FRA     2024-02   99.4      A</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt;  9:      FRA     2024-03  100.3      A</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; 10:      FRA     2024-04  101.2      A</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; 11:      FRA     2024-05  102.5      A</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 12:      FRA     2024-06  103.0      P</span></span></code></pre></div>
+</div>
+<div id="observations-dimensions-and-attributes" class="section level2">
+<h2>Observations, dimensions and attributes</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">attr</span>(x, <span class="st">&quot;Dimensions&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;FREQ&quot;        &quot;REF_AREA&quot;    &quot;MEASURE&quot;     &quot;GROUP&quot;       &quot;TIME_PERIOD&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">attr</span>(x, <span class="st">&quot;OECDAttributes&quot;</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;OBS_STATUS&quot; &quot;UNIT_MULT&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">str</span>(x)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; Classes &#39;OECDDataset&#39;, &#39;data.table&#39; and &#39;data.frame&#39;:    12 obs. of  9 variables:</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;  $ FREQ       : chr  &quot;M&quot; &quot;M&quot; &quot;M&quot; &quot;M&quot; ...</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;  $ REF_AREA   : chr  &quot;USA&quot; &quot;USA&quot; &quot;USA&quot; &quot;USA&quot; ...</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt;  $ MEASURE    : chr  &quot;IX&quot; &quot;IX&quot; &quot;IX&quot; &quot;IX&quot; ...</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt;  $ GROUP      : chr  &quot;00&quot; &quot;00&quot; &quot;00&quot; &quot;00&quot; ...</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt;  $ TIME_PERIOD: chr  &quot;2024-01&quot; &quot;2024-02&quot; &quot;2024-03&quot; &quot;2024-04&quot; ...</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt;  $ value_     : num  100 102 102 103 103 ...</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt;  $ flags_     : chr  &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt;  $ OBS_STATUS : chr  &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt;  $ UNIT_MULT  : chr  &quot;0&quot; &quot;0&quot; &quot;0&quot; &quot;0&quot; ...</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt;  - attr(*, &quot;.internal.selfref&quot;)=&lt;pointer: 0x0000023d2d14cf60&gt; </span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt;  - attr(*, &quot;RequestedDatasetCode&quot;)= chr &quot;TEST,DEMO,1.0&quot;</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt;  - attr(*, &quot;OECDDatasetCode&quot;)= chr &quot;TEST,DEMO,1.0&quot;</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;  - attr(*, &quot;DownloadTime&quot;)= POSIXct[1:1], format: &quot;2024-01-01&quot;</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt;  - attr(*, &quot;SourceURL&quot;)= chr &quot;synthetic example bundled with OECDdata&quot;</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt;  - attr(*, &quot;Cached&quot;)= logi FALSE</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt;  - attr(*, &quot;Dimensions&quot;)= chr [1:5] &quot;FREQ&quot; &quot;REF_AREA&quot; &quot;MEASURE&quot; &quot;GROUP&quot; ...</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt;  - attr(*, &quot;OECDAttributes&quot;)= chr [1:2] &quot;OBS_STATUS&quot; &quot;UNIT_MULT&quot;</span></span></code></pre></div>
+<p><code>value_</code> is numeric. Dimension codes remain strings or,
+with the default options, factors. Numeric-looking identifiers retain
+leading zeros. <code>flags_</code> preserves <code>OBS_STATUS</code>
+without translating it into another provider’s status vocabulary. The
+original attribute is retained too.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>series_keys <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">attr</span>(x, <span class="st">&quot;Dimensions&quot;</span>), <span class="st">&quot;TIME_PERIOD&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>x[, .(<span class="at">observations =</span> .N, <span class="at">missing =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(value_))), by <span class="ot">=</span> series_keys]</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt;      FREQ REF_AREA MEASURE  GROUP observations missing</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;    &lt;char&gt;   &lt;char&gt;  &lt;char&gt; &lt;char&gt;        &lt;int&gt;   &lt;int&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 1:      M      USA      IX     00            6       0</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 2:      M      FRA      IX     00            6       0</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>x[, .N, by <span class="ot">=</span> OBS_STATUS]</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;    OBS_STATUS     N</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt;        &lt;char&gt; &lt;int&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; 1:          A    10</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; 2:          P     2</span></span></code></pre></div>
+<p>An incomplete series is not automatically filled with zeros. An
+attribute such as <code>UNIT_MULT</code> is not automatically applied:
+verify whether the reported value and the unit metadata require scaling
+in your analysis.</p>
+</div>
+<div id="safe-reshaping-and-plotting" class="section level2">
+<h2>Safe reshaping and plotting</h2>
+<p>This synthetic example contains one frequency, measure and group per
+country. Check that simplification before dropping those columns.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">stopifnot</span>(x[, <span class="fu">uniqueN</span>(FREQ)] <span class="sc">==</span> <span class="dv">1</span><span class="dt">L</span>, x[, <span class="fu">uniqueN</span>(MEASURE)] <span class="sc">==</span> <span class="dv">1</span><span class="dt">L</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>          x[, <span class="fu">uniqueN</span>(GROUP)] <span class="sc">==</span> <span class="dv">1</span><span class="dt">L</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>          <span class="sc">!</span><span class="fu">anyDuplicated</span>(x, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;TIME_PERIOD&quot;</span>, <span class="st">&quot;REF_AREA&quot;</span>)))</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">dcast</span>(x, TIME_PERIOD <span class="sc">~</span> REF_AREA, <span class="at">value.var =</span> <span class="st">&quot;value_&quot;</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; Key: &lt;TIME_PERIOD&gt;</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;    TIME_PERIOD   FRA   USA</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;         &lt;char&gt; &lt;num&gt; &lt;num&gt;</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; 1:     2024-01 100.0 100.0</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; 2:     2024-02  99.4 101.5</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 3:     2024-03 100.3 102.0</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; 4:     2024-04 101.2 103.2</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; 5:     2024-05 102.5 102.9</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; 6:     2024-06 103.0 104.1</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>one <span class="ot">&lt;-</span> x[REF_AREA <span class="sc">==</span> <span class="st">&quot;USA&quot;</span>][<span class="fu">order</span>(TIME_PERIOD)]</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">as.Date</span>(<span class="fu">paste0</span>(one<span class="sc">$</span>TIME_PERIOD, <span class="st">&quot;-01&quot;</span>)), one<span class="sc">$</span>value_, <span class="at">type =</span> <span class="st">&quot;l&quot;</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;Month&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;Synthetic index&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Invented example&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="an-adjacent-period-change" class="section level2">
+<h2>An adjacent-period change</h2>
+<p>Sorting is necessary but not sufficient. Check that observations are
+exactly one month apart, so a gap is not misinterpreted as one month’s
+growth.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">copy</span>(x) <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  .[, month_id <span class="sc">:=</span> <span class="fu">as.integer</span>(<span class="fu">substr</span>(TIME_PERIOD, <span class="dv">1</span>, <span class="dv">4</span>)) <span class="sc">*</span> <span class="dv">12</span><span class="dt">L</span> <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                  <span class="fu">as.integer</span>(<span class="fu">substr</span>(TIME_PERIOD, <span class="dv">6</span>, <span class="dv">7</span>))] <span class="sc">%&gt;%</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  .[<span class="fu">order</span>(month_id), <span class="st">`</span><span class="at">:=</span><span class="st">`</span>(<span class="at">previous =</span> <span class="fu">shift</span>(value_),</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                        <span class="at">previous_month =</span> <span class="fu">shift</span>(month_id)), by <span class="ot">=</span> series_keys] <span class="sc">%&gt;%</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  .[, growth_pct <span class="sc">:=</span> <span class="fu">fifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(previous) <span class="sc">&amp;</span> previous <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">&amp;</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>                             month_id <span class="sc">-</span> previous_month <span class="sc">==</span> <span class="dv">1</span><span class="dt">L</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>                           <span class="dv">100</span> <span class="sc">*</span> (value_ <span class="sc">/</span> previous <span class="sc">-</span> <span class="dv">1</span>), <span class="cn">NA_real_</span>)] <span class="sc">%&gt;%</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  .[, .(REF_AREA, TIME_PERIOD, growth_pct)]</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;     REF_AREA TIME_PERIOD growth_pct</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;       &lt;char&gt;      &lt;char&gt;      &lt;num&gt;</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt;  1:      USA     2024-01         NA</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;  2:      USA     2024-02  1.5000000</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt;  3:      USA     2024-03  0.4926108</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt;  4:      USA     2024-04  1.1764706</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt;  5:      USA     2024-05 -0.2906977</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt;  6:      USA     2024-06  1.1661808</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;  7:      FRA     2024-01         NA</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt;  8:      FRA     2024-02 -0.6000000</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt;  9:      FRA     2024-03  0.9054326</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; 10:      FRA     2024-04  0.8973081</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; 11:      FRA     2024-05  1.2845850</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; 12:      FRA     2024-06  0.4878049</span></span></code></pre></div>
+</div>
+<div id="discovery-and-metadata-online-not-evaluated" class="section level2">
+<h2>Discovery and metadata (online, not evaluated)</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>OECDdata<span class="sc">::</span><span class="fu">find</span>(<span class="st">&quot;health expenditure&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>OECDdata<span class="sc">::</span><span class="fu">find</span>(education, expenditure)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">browseDataList</span>(<span class="fu">grepl</span>(<span class="st">&quot;employment&quot;</span>, <span class="st">`</span><span class="at">Dataset name</span><span class="st">`</span>, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>code <span class="ot">&lt;-</span> <span class="st">&quot;CLI&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">oecdStructure</span>(code)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>s<span class="sc">$</span>flow</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>s<span class="sc">$</span>dimensions</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>s<span class="sc">$</span>labels<span class="sc">$</span>REF_AREA</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="fu">importLabels</span>(<span class="st">&quot;REF_AREA&quot;</span>, <span class="at">dataset =</span> code)</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="fu">describe</span>(code, <span class="at">wide =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>A codelist describes permissible values. An Actual content constraint
+can establish reported marginal availability, but not that every
+combination of values is observed. <code>describe()</code> and
+<code>importMetabase()</code> fail explicitly when that coverage cannot
+be established. <code>availability = &quot;allowed&quot;</code> is an explicit
+alternative for dictionary-based inventories, not a substitute presented
+as observed coverage.</p>
+</div>
+<div id="short-codes-and-dataset-identity-online-not-evaluated" class="section level2">
+<h2>Short codes and dataset identity (online, not evaluated)</h2>
+<p>A short code is matched against the current catalogue, not a
+hard-coded alias list. Ambiguity is an error. Agency and dataflow-prefix
+selectors can resolve it without making the dataset code harder to read.
+Resolve once for reuse:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>ref <span class="ot">&lt;-</span> <span class="fu">oecdDataset</span>(<span class="st">&quot;CLI&quot;</span>, <span class="at">agency =</span> <span class="st">&quot;OECD.SDD.STES&quot;</span>, <span class="at">prefix =</span> <span class="st">&quot;DSD_STES&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>ref</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">importLabels</span>(<span class="at">OECDDimCode =</span> <span class="st">&quot;REF_AREA&quot;</span>, <span class="at">dataset =</span> ref)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co"># A query preview fetches metadata but does not download observations.</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="fu">oecdQuery</span>(<span class="st">&quot;CLI&quot;</span>, <span class="at">filters =</span> <span class="fu">list</span>(</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  <span class="at">.dataset =</span> <span class="fu">list</span>(<span class="at">agency =</span> <span class="st">&quot;OECD.SDD.STES&quot;</span>, <span class="at">prefix =</span> <span class="st">&quot;DSD_STES&quot;</span>),</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  <span class="at">REF_AREA =</span> <span class="st">&quot;USA&quot;</span>, <span class="at">FREQ =</span> <span class="st">&quot;M&quot;</span>, <span class="at">TIME_PERIOD =</span> <span class="fu">c</span>(<span class="st">&quot;2023-01&quot;</span>, <span class="st">&quot;2023-12&quot;</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>))</span></code></pre></div>
+<p>The reserved <code>.dataset</code> block selects agency, dataflow
+namespace and/or version; it is not a set of series dimensions.
+<code>prefix</code> matches the dataflow ID prefix before
+<code>@</code>. The actual referenced DSD is read from the server
+metadata. All other filter entries retain their ordinary dimension
+semantics. A selector-only block leaves all observations unrestricted. A
+qualified reference avoids the catalogue lookup, and explicit
+selector/reference conflicts are errors.</p>
+</div>
+<div id="a-small-download-online-not-evaluated" class="section level2">
+<h2>A small download (online, not evaluated)</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>cli <span class="ot">&lt;-</span> <span class="fu">importData</span>(code, <span class="fu">list</span>(<span class="at">REF_AREA =</span> <span class="fu">c</span>(<span class="st">&quot;USA&quot;</span>, <span class="st">&quot;FRA&quot;</span>), <span class="at">FREQ =</span> <span class="st">&quot;M&quot;</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                             <span class="at">TIME_PERIOD =</span> <span class="fu">c</span>(<span class="st">&quot;2023-01&quot;</span>, <span class="st">&quot;2023-12&quot;</span>)))</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">attr</span>(cli, <span class="st">&quot;SourceURL&quot;</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="fu">attr</span>(cli, <span class="st">&quot;OECDDatasetCode&quot;</span>)</span></code></pre></div>
+<p>The two time bounds define an inclusive range. An unspecified
+dimension is a wildcard, so the result may include multiple measures or
+transformations. Never collapse them into a single line or aggregate
+solely by country and date without checking the other key
+dimensions.</p>
+</div>
+<div id="caching-and-provenance" class="section level2">
+<h2>Caching and provenance</h2>
+<p>Requests are cached in a session temporary directory by default.
+Persistent storage is opt-in. Offline mode accepts expired but verified
+cache entries; missing or corrupt entries cause explicit errors. Cached
+data retain their original download time. A structure version is not a
+statistical vintage.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">attributes</span>(x)[<span class="fu">c</span>(<span class="st">&quot;RequestedDatasetCode&quot;</span>, <span class="st">&quot;OECDDatasetCode&quot;</span>, <span class="st">&quot;DownloadTime&quot;</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>                <span class="st">&quot;SourceURL&quot;</span>, <span class="st">&quot;Dimensions&quot;</span>)]</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; $RequestedDatasetCode</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;TEST,DEMO,1.0&quot;</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; $OECDDatasetCode</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;TEST,DEMO,1.0&quot;</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; $DownloadTime</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;2024-01-01 UTC&quot;</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; $SourceURL</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; [1] &quot;synthetic example bundled with OECDdata&quot;</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; $Dimensions</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; [1] &quot;FREQ&quot;        &quot;REF_AREA&quot;    &quot;MEASURE&quot;     &quot;GROUP&quot;       &quot;TIME_PERIOD&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">oecdOptions</span>(<span class="at">cache_dir =</span> tools<span class="sc">::</span><span class="fu">R_user_dir</span>(<span class="st">&quot;OECDdata&quot;</span>, <span class="st">&quot;cache&quot;</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co"># First make a successful online request with the desired metadata and filters.</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co"># Then use offline = TRUE with the same request.</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="fu">saveRDS</span>(<span class="fu">list</span>(<span class="at">data =</span> cli, <span class="at">provenance =</span> <span class="fu">attributes</span>(cli)), <span class="st">&quot;cli-snapshot.rds&quot;</span>)</span></code></pre></div>
+<p>HTTP failures remain structured errors. HTTP 204 is an explicit empty
+result with a warning. The client never converts an arbitrary 404 or
+malformed response into an apparently successful empty dataset.</p>
+</div>
+<div id="restore-session-settings" class="section level2">
+<h2>Restore session settings</h2>
+<p>Use <code>old &lt;- oecdOptions(...)</code> with
+<code>on.exit(options(old))</code> inside your own functions to keep
+option changes local. The package itself does not change options at load
+time.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
