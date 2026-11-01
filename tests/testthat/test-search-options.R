@@ -95,8 +95,7 @@ test_that("HTML previews survive the browser handoff until session cleanup", {
   withr::defer(unlink(c(first, second, plain)))
   expect_true(all(file.exists(c(first, second, plain))))
   expect_false(identical(first, second))
-  expect_true(startsWith(normalizePath(first, winslash = "/"),
-    normalizePath(tempdir(), winslash = "/")))
+  invisible(lapply(c(first, second, plain), expect_path_parent, parent = tempdir()))
   expect_equal(readLines(second), "<p>Second</p>")
   expect_match(plain, "\\.txt$")
   expect_error(OECDdata:::.browser_report_file("x", "exe"), "Unsupported")
@@ -106,6 +105,44 @@ test_that("default session cache lives inside R's temporary directory", {
   old <- oecdOptions(cache_dir = NULL)
   withr::defer(options(old))
   root <- OECDdata:::.cache_directory(create = FALSE)
-  expect_true(startsWith(normalizePath(root, winslash = "/", mustWork = FALSE),
-    normalizePath(tempdir(), winslash = "/")))
+  expect_identical(basename(root), "OECDdata-cache")
+  expect_path_parent(root, tempdir())
+})
+
+test_that("default cache creation stays lazy through a temporary-directory alias", {
+  root <- tempfile("oecd-cache-symlink-")
+  dir.create(root)
+  withr::defer(unlink(root, recursive = TRUE))
+  physical <- file.path(root, "physical")
+  alias <- file.path(root, "alias")
+  dir.create(physical)
+  # Windows directory symlinks can leave reparse points that base unlink()
+  # cannot remove. Use its supported directory junctions on that platform.
+  linked <- suppressWarnings(if (.Platform$OS.type == "windows")
+    Sys.junction(normalizePath(physical, winslash = "/", mustWork = TRUE), alias)
+    else file.symlink(normalizePath(physical, winslash = "/", mustWork = TRUE), alias))
+  skip_if_not(isTRUE(linked), "Creating directory aliases is unavailable on this system")
+  local_oecd(cache_dir = NULL)
+
+  # Exercise the production function with isolated state and an aliased
+  # tempdir. Do not create or remove the running session's actual default cache.
+  state <- new.env(parent = emptyenv())
+  state$cache_dir <- NULL
+  cache_directory <- OECDdata:::.cache_directory
+  environment(cache_directory) <- list2env(list(.state = state, tempdir = function() alias),
+    parent = environment(cache_directory))
+
+  pending <- cache_directory(create = FALSE)
+  expect_identical(basename(pending), "OECDdata-cache")
+  expect_path_parent(pending, physical)
+  expect_false(dir.exists(pending), info = paste("Cache was created prematurely:", pending))
+  created <- cache_directory(create = TRUE)
+  expect_identical(created, pending)
+  expect_true(dir.exists(file.path(physical, "OECDdata-cache")))
+  expect_path_parent(created, physical)
+
+  # Remove only the alias, and prove its target remains available for cleanup.
+  expect_identical(unlink(alias, recursive = TRUE), 0L)
+  expect_false(dir.exists(alias))
+  expect_true(dir.exists(file.path(physical, "OECDdata-cache")))
 })

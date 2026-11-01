@@ -42,7 +42,8 @@ are distinct. A dataflow structure version is not a frozen data vintage.
 
 Useful workflow conventions and selected semantics are retained with OECD-native names. No upstream GPL
 implementation is copied or included. See ATTRIBUTION.md for acknowledgments.
-The test suite records the adapted OECD formals; tools/check-api.R applies an
+The test suite records the adapted OECD formals; the GitHub maintainer tool
+`tools/check-api.R` applies an
 explicit naming map before comparing defaults with an installed upstream package.
 
 ## Implementation and release references
@@ -62,3 +63,34 @@ The package adds catalogue-based shorthand resolution and a reserved
 that the OECD service accepts `CLI` as a universal resource identifier. The
 `prefix` selector matches the namespace before `@` in the dataflow ID; the
 referenced DSD is independently read from metadata. Aliases are not hard-coded.
+
+## Native XML and binary builds in 0.3.0
+
+Reviewed 28 October 2026 against primary documentation:
+
+- https://gnome.pages.gitlab.gnome.org/libxml2/html/parser_8h.html
+- https://gnome.pages.gitlab.gnome.org/libxml2/html/tree_8h.html
+- https://gnome.pages.gitlab.gnome.org/libxml2/html/xpath_8h.html
+- https://cran.r-project.org/doc/manuals/r-release/R-exts.html
+- https://search.r-project.org/R/refmans/utils/html/INSTALL.html
+- https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job
+- https://contributor.r-project.org/windows-arm64/
+- https://github.com/r-lib/actions/releases
+
+Native extraction and indexing are independent package-owned implementations
+using public libxml2 and R APIs. Benchmark results are local measurements,
+documented in the GitHub distribution's performance report, rather than
+performance claims from these sources.
+
+## CRAN path correction in 0.3.2
+
+Reviewed 31 October 2026 against the published check results and primary guidance:
+
+- https://cran.r-project.org/web/checks/check_results_OECDdata.html
+- https://www.stats.ox.ac.uk/pub/bdr/M1mac/OECDdata.out
+- https://stat.ethz.ch/R-manual/R-devel/library/base/html/normalizePath.html
+- https://cran.r-project.org/web/packages/policies.html
+
+The M1mac failure was a path assertion involving a nonexistent cache directory.
+Canonicalization is now applied to its existing parent, and failures display
+the raw paths and canonical parents. Runtime cache placement is unchanged.

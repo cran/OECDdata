@@ -3,6 +3,18 @@ fixture_doc <- function() xml2::read_xml(fixture_path("structure.xml"), options 
 fixture_structure <- function(code = "TEST,DEMO,1.0", doc = fixture_doc())
   OECDdata:::.parse_structure(doc, OECDdata:::.parse_reference(code))
 fixture_csv <- function() data.table::fread(fixture_path("example.csv"), colClasses = "character", na.strings = NULL)
+expect_path_parent <- function(path, parent) {
+  # The leaf can legitimately be absent when creation is deferred. realpath()
+  # cannot canonicalize that full path consistently across operating systems.
+  resolved_parent <- normalizePath(dirname(path), winslash = "/", mustWork = TRUE)
+  expected_parent <- normalizePath(parent, winslash = "/", mustWork = TRUE)
+  testthat::expect_identical(resolved_parent, expected_parent, info = paste(
+    paste0("Path: ", path), paste0("Path exists: ", file.exists(path)),
+    paste0("Expected parent: ", parent),
+    paste0("Resolved actual parent: ", resolved_parent),
+    paste0("Resolved expected parent: ", expected_parent), sep = "\n"))
+  invisible(path)
+}
 write_csv <- function(x) {
   path <- tempfile(fileext = ".csv")
   data.table::fwrite(x, path, na = "", quote = "auto")
